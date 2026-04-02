@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>AgriGuru – Kerala PoP Flashcards Set 2</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    font-family: 'Nunito', 'Google Sans', 'SF Pro Rounded', ui-rounded,
+                 'Segoe UI Variable', system-ui, -apple-system, Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #e8f8e0 0%, #d4f0e8 50%, #e8f4ff 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+  }
+  #bg-leaves {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  #app {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 520px;
+    min-height: 100vh;
+    padding: 20px 18px 40px;
+    display: flex; flex-direction: column;
+  }
+  #brand-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 6px 14px 6px 10px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 12px rgba(39,80,10,0.10);
+    border: 1.5px solid #C0DD97;
+    flex-shrink: 0;
+  }
+  #brand-phone {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 15px; font-weight: 800;
+    color: #1B5E20; letter-spacing: .02em;
+  }
+  #header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; flex-shrink: 0;
+  }
+  #title-text {
+    font-size: 13px; font-weight: 800;
+    color: #27500A; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  #score-badge {
+    background: #27500A; color: #EAF3DE;
+    font-size: 13px; font-weight: 700;
+    padding: 4px 14px; border-radius: 20px;
+    flex-shrink: 0;
+  }
+  #counter {
+    font-size: 12px; color: #3B6D11;
+    font-weight: 700; margin-bottom: 5px; text-align: right; flex-shrink: 0;
+  }
+  #views-left {
+    font-size: 10px; color: #854F0B; font-weight: 700;
+    text-align: right; margin-bottom: 4px; letter-spacing: 0.02em; flex-shrink: 0;
+  }
+  #pbg {
+    height: 7px; background: #C0DD97;
+    border-radius: 4px; margin-bottom: 16px; overflow: hidden; flex-shrink: 0;
+  }
+  #pb {
+    height: 100%;
+    background: linear-gradient(90deg, #5DCAA5, #3B6D11);
+    border-radius: 4px; transition: width 0.45s ease; min-width: 7px;
+  }
+  #filter-row {
+    display: flex; gap: 6px; flex-wrap: nowrap;
+    overflow-x: auto; scrollbar-width: none;
+    margin-bottom: 12px; padding-bottom: 2px; flex-shrink: 0;
+  }
+  #filter-row::-webkit-scrollbar { display: none; }
+  .fpill {
+    flex-shrink: 0; border-radius: 20px;
+    padding: 4px 12px; font-size: 11px; font-weight: 800;
+    border: 1.5px solid; cursor: pointer;
+    transition: opacity .2s; white-space: nowrap;
+  }
+  .fpill.off { opacity: .28; }
+  #card {
+    flex: 1; background: #ffffff;
+    border-radius: 24px; padding: 24px 20px 18px;
+    display: flex; flex-direction: column;
+    cursor: pointer; position: relative; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
+    transition: transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 6px 30px rgba(63,120,30,0.13);
+    border: 2px solid #C0DD97; min-height: 280px;
+  }
+  #card:active { transform: scale(0.985); }
+  #card.state-a {
+    background: linear-gradient(160deg, #fffef0 0%, #f0fbe6 100%);
+    border-color: #FAC775;
+    box-shadow: 0 6px 30px rgba(186,117,23,0.12);
+  }
+  #card-art-br {
+    position: absolute; bottom: -4px; right: -4px;
+    width: 110px; height: 110px; opacity: 0.18; pointer-events: none;
+  }
+  #card-art-tl {
+    position: absolute; top: -4px; left: -4px;
+    width: 80px; height: 80px; opacity: 0.12; pointer-events: none;
+    transform: rotate(180deg);
+  }
+  #tag {
+    display: inline-block; font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 4px 12px; border-radius: 14px; margin-bottom: 16px;
+  }
+  .tag-agronomy    { background:#E8F5E9; color:#1B5E20; }
+  .tag-soil        { background:#F9FBE7; color:#33691E; }
+  .tag-protection  { background:#FFF8E1; color:#E65100; }
+  .tag-improvement { background:#EDE7F6; color:#311B92; }
+  .tag-horticulture{ background:#FBE9E7; color:#BF360C; }
+  .tag-social      { background:#FCE4EC; color:#880E4F; }
+  #question {
+    font-size: 20px; font-weight: 700;
+    color: #1a3a06; line-height: 1.55; flex: 1;
+  }
+  #tap-hint {
+    margin-top: 18px; font-size: 13px;
+    color: #5DCAA5; font-weight: 700;
+    text-align: center; letter-spacing: 0.02em;
+  }
+  #answer-area {
+    display: none; margin-top: 16px;
+    border-top: 1.5px dashed #C0DD97;
+    padding-top: 14px;
+    animation: popIn 0.28s ease;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #answer-label {
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: #854F0B; margin-bottom: 6px;
+  }
+  #answer {
+    font-size: 22px; font-weight: 800;
+    color: #0F6E56; margin-bottom: 6px; line-height: 1.35;
+  }
+  #hint {
+    font-size: 13px; color: #639922;
+    font-style: italic; line-height: 1.45;
+  }
+  #ref-text {
+    font-size: 11px; color: #888;
+    margin-top: 8px; line-height: 1.4;
+    border-top: 1px dashed #ddd; padding-top: 6px;
+  }
+  #ref-text span { font-weight: 700; color: #639922; }
+  #streak {
+    min-height: 20px; font-size: 13px;
+    font-weight: 700; color: #854F0B;
+    text-align: center; margin-top: 8px; flex-shrink: 0;
+  }
+  #btns {
+    display: none; gap: 12px; margin-top: 14px; flex-direction: row; flex-shrink: 0;
+  }
+  #btns button {
+    flex: 1; padding: 14px; border-radius: 16px;
+    font-size: 15px; font-weight: 800; cursor: pointer; border: none;
+    transition: transform 0.1s, filter 0.15s;
+    font-family: inherit; letter-spacing: 0.02em;
+  }
+  #btns button:active { transform: scale(0.96); }
+  #btn-got  { background: #27500A; color: #EAF3DE; }
+  #btn-got:hover  { filter: brightness(1.15); }
+  #btn-miss { background: #993C1D; color: #FAECE7; }
+  #btn-miss:hover { filter: brightness(1.15); }
+  #done {
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex: 1; text-align: center; padding: 2rem 1rem;
+    animation: popIn 0.35s ease;
+  }
+  #done-icon { width: 90px; height: 90px; margin-bottom: 16px; }
+  #done h2 { font-size: 26px; font-weight: 800; color: #27500A; margin-bottom: 8px; }
+  #done p  { font-size: 16px; color: #3B6D11; line-height: 1.55; margin-bottom: 24px; max-width: 320px; }
+  #locked-screen {
+    display: none; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(160deg, #e8f8e0 0%, #d4f0e8 50%, #e8f4ff 100%);
+    z-index: 999; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 2rem;
+  }
+</style>
+</head>
+<body>
+
+<svg id="bg-leaves" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <g opacity="0.10">
+    <path d="M-20 100 C40 60 90 120 30 200 C-10 150 -30 130 -20 100Z" fill="#639922"/>
+    <line x1="5" y1="110" x2="28" y2="195" stroke="#3B6D11" stroke-width="1.5"/>
+    <line x1="5" y1="130" x2="30" y2="145" stroke="#3B6D11" stroke-width="1"/>
+    <line x1="5" y1="155" x2="28" y2="170" stroke="#3B6D11" stroke-width="1"/>
+  </g>
+  <g opacity="0.09">
+    <path d="M380 300 C320 260 270 310 330 400 C370 360 390 340 380 300Z" fill="#1D9E75"/>
+    <line x1="355" y1="310" x2="333" y2="395" stroke="#0F6E56" stroke-width="1.5"/>
+    <line x1="355" y1="330" x2="330" y2="345" stroke="#0F6E56" stroke-width="1"/>
+    <line x1="355" y1="355" x2="332" y2="370" stroke="#0F6E56" stroke-width="1"/>
+  </g>
+  <g opacity="0.08">
+    <path d="M30 500 C80 460 130 510 80 590 C40 555 15 535 30 500Z" fill="#5DCAA5"/>
+    <line x1="55" y1="510" x2="78" y2="585" stroke="#1D9E75" stroke-width="1.5"/>
+  </g>
+  <g opacity="0.10">
+    <path d="M360 600 C300 570 260 630 310 700 C350 670 375 645 360 600Z" fill="#97C459"/>
+    <line x1="335" y1="608" x2="312" y2="695" stroke="#639922" stroke-width="1.5"/>
+    <line x1="335" y1="628" x2="312" y2="643" stroke="#639922" stroke-width="1"/>
+    <line x1="335" y1="652" x2="313" y2="667" stroke="#639922" stroke-width="1"/>
+  </g>
+  <g opacity="0.07">
+    <path d="M10 720 C60 690 100 740 60 800 C25 775 0 755 10 720Z" fill="#EF9F27"/>
+    <line x1="38" y1="728" x2="60" y2="795" stroke="#BA7517" stroke-width="1.5"/>
+  </g>
+</svg>
+
+<div id="app">
+
+  <!-- Brand Bar -->
+  <div id="brand-bar">
+    <svg viewBox="0 0 210 52" xmlns="http://www.w3.org/2000/svg" style="height:42px;width:auto;display:block">
+      <text x="14" y="11" font-family="Georgia,'Times New Roman',serif" font-size="8.5" font-style="italic" font-weight="700" fill="#2E7D32" letter-spacing="0.3">Conglomer India's</text>
+      <text x="10" y="40" font-family="Georgia,'Times New Roman',serif" font-size="32" font-weight="900" letter-spacing="-0.5">
+        <tspan fill="#2E7D32">agri</tspan><tspan fill="#c8a800">guru</tspan>
+      </text>
+      <text x="100" y="51" font-family="'Courier New',Courier,monospace" font-size="11.5" font-weight="700" fill="#7a8a00" letter-spacing="3">EDTECH</text>
+      <circle cx="73" cy="9" r="2.8" fill="#2E7D32"/>
+    </svg>
+    <div id="brand-phone">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 2C3 1.45 3.45 1 4 1H6.28C6.76 1 7.18 1.32 7.31 1.79L8.05 4.6C8.18 5.07 7.97 5.57 7.55 5.82L6.3 6.55C7.08 8.28 8.72 9.92 10.45 10.7L11.18 9.45C11.43 9.03 11.93 8.82 12.4 8.95L15.21 9.69C15.68 9.82 16 10.24 16 10.72V13C16 13.55 15.55 14 15 14C8.37 14 3 8.63 3 2Z" fill="#2E7D32"/>
+      </svg>
+      8590 753 947
+    </div>
+  </div>
+
+  <div id="header">
+    <div id="title-text">Kerala PoP Flashcards — Set 2</div>
+    <div id="score-badge">Score: <span id="score-num">0</span></div>
+  </div>
+
+  <div id="counter">Card 1 of 20</div>
+  <div id="views-left" style="font-size:10px;color:#854F0B;font-weight:700;text-align:right;margin-bottom:4px;letter-spacing:0.02em;"></div>
+  <div id="pbg"><div id="pb" style="width:3%"></div></div>
+  <div id="filter-row"></div>
+
+  <div id="card" class="state-q" onclick="flipCard()">
+    <svg id="card-art-br" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+      <path d="M55 105 C55 65 85 35 95 10 C75 28 60 55 55 105Z" fill="#97C459"/>
+      <path d="M55 105 C55 60 25 32 15 8 C35 28 50 56 55 105Z" fill="#5DCAA5"/>
+      <rect x="53" y="72" width="4" height="36" rx="2" fill="#3B6D11"/>
+    </svg>
+    <svg id="card-art-tl" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 75 C40 45 62 18 70 5 C54 20 42 42 40 75Z" fill="#FAC775"/>
+      <path d="M40 75 C40 42 18 16 10 4 C26 20 38 44 40 75Z" fill="#EF9F27"/>
+    </svg>
+    <div id="tag" class="tag-agronomy">Agronomy</div>
+    <div id="question">Loading...</div>
+    <div id="answer-area">
+      <div id="answer-label">Answer</div>
+      <div id="answer"></div>
+      <div id="hint"></div>
+      <div id="ref-text"></div>
+    </div>
+    <div id="tap-hint">Tap to reveal the answer</div>
+  </div>
+
+  <div id="streak"></div>
+
+  <div id="btns" style="display:none; gap:12px; margin-top:14px; flex-direction:row;">
+    <button id="btn-miss" onclick="mark(false)">&#10007; Missed</button>
+    <button id="btn-got"  onclick="mark(true)">&#10003; Got it!</button>
+  </div>
+
+  <!-- Main page logo footer -->
+  <div style="margin-top:10px;display:flex;justify-content:center;flex-shrink:0;">
+    <svg viewBox="0 0 210 52" xmlns="http://www.w3.org/2000/svg" style="height:34px;width:auto;display:block;opacity:0.75;">
+      <text x="14" y="11" font-family="Georgia,'Times New Roman',serif" font-size="8.5" font-style="italic" font-weight="700" fill="#2E7D32" letter-spacing="0.3">Conglomer India's</text>
+      <text x="10" y="40" font-family="Georgia,'Times New Roman',serif" font-size="32" font-weight="900" letter-spacing="-0.5">
+        <tspan fill="#2E7D32">agri</tspan><tspan fill="#c8a800">guru</tspan>
+      </text>
+      <text x="100" y="51" font-family="'Courier New',Courier,monospace" font-size="11.5" font-weight="700" fill="#7a8a00" letter-spacing="3">EDTECH</text>
+      <circle cx="73" cy="9" r="2.8" fill="#2E7D32"/>
+    </svg>
+  </div>
+
+  <!-- Done Screen -->
+  <div id="done">
+    <svg id="done-icon" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+      <rect x="42" y="30" width="6" height="45" rx="3" fill="#3B6D11"/>
+      <path d="M45 55 C45 30 70 15 78 5 C60 18 48 38 45 55Z" fill="#639922"/>
+      <path d="M45 55 C45 28 20 13 12 3 C30 17 43 38 45 55Z" fill="#97C459"/>
+      <path d="M45 42 C45 22 62 10 70 2 C55 14 47 30 45 42Z" fill="#5DCAA5"/>
+      <ellipse cx="45" cy="77" rx="18" ry="6" fill="#C0DD97"/>
+    </svg>
+    <h2 id="done-title">0 / 20 correct</h2>
+    <p id="done-msg">Keep practising!</p>
+    <p style="font-size:12px;color:#97C459;margin-top:12px;">Session complete. Good luck with your Kerala PSC exam!</p>
+    <!-- Done screen promo banner -->
+    <div id="banner-img" style="margin-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(160deg,rgba(39,80,10,0.07),rgba(15,110,86,0.07));border:1.5px solid #C0DD97;border-radius:16px;padding:12px 16px;">
+      <svg viewBox="0 0 210 52" xmlns="http://www.w3.org/2000/svg" style="width:160px;display:block;filter:drop-shadow(0 2px 8px rgba(46,125,50,0.2));">
+        <text x="14" y="11" font-family="Georgia,'Times New Roman',serif" font-size="8.5" font-style="italic" font-weight="700" fill="#2E7D32" letter-spacing="0.3">Conglomer India's</text>
+        <text x="10" y="40" font-family="Georgia,'Times New Roman',serif" font-size="32" font-weight="900" letter-spacing="-0.5">
+          <tspan fill="#2E7D32">agri</tspan><tspan fill="#c8a800">guru</tspan>
+        </text>
+        <text x="100" y="51" font-family="'Courier New',Courier,monospace" font-size="11.5" font-weight="700" fill="#7a8a00" letter-spacing="3">EDTECH</text>
+        <circle cx="73" cy="9" r="2.8" fill="#2E7D32"/>
+      </svg>
+      <div style="height:1px;width:80%;background:linear-gradient(90deg,transparent,rgba(200,168,0,0.5),transparent);margin:2px 0;"></div>
+      <p style="color:#27500A;font-size:13px;font-weight:700;text-align:center;letter-spacing:0.01em;line-height:1.4;margin:0;font-family:'Georgia','Times New Roman',serif;font-style:italic;">Confused after your Agri degree?</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;">
+        <span style="font-size:11px;font-weight:700;color:#1B5E20;letter-spacing:0.05em;text-transform:uppercase;border:1.5px solid rgba(27,94,32,0.3);border-radius:20px;padding:3px 11px;background:rgba(27,94,32,0.07);font-family:'Georgia','Times New Roman',serif;">Coaching</span>
+        <span style="color:#c8a800;font-size:15px;line-height:1;">•</span>
+        <span style="font-size:11px;font-weight:700;color:#1B5E20;letter-spacing:0.05em;text-transform:uppercase;border:1.5px solid rgba(27,94,32,0.3);border-radius:20px;padding:3px 11px;background:rgba(27,94,32,0.07);font-family:'Georgia','Times New Roman',serif;">Certified Courses</span>
+        <span style="color:#c8a800;font-size:15px;line-height:1;">•</span>
+        <span style="font-size:11px;font-weight:700;color:#1B5E20;letter-spacing:0.05em;text-transform:uppercase;border:1.5px solid rgba(27,94,32,0.3);border-radius:20px;padding:3px 11px;background:rgba(27,94,32,0.07);font-family:'Georgia','Times New Roman',serif;">Job Updates</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div style="width:28px;height:28px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.946-1.414A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.952 7.952 0 01-4.054-1.108l-.291-.173-3.017.862.878-3.204-.19-.31A7.952 7.952 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;color:#3B6D11;font-family:'Georgia','Times New Roman',serif;font-style:italic;">We'll guide you!</div>
+          <div style="font-size:20px;font-weight:900;color:#1B5E20;letter-spacing:0.04em;font-family:'Georgia','Times New Roman',serif;">8590 753 947</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<!-- Locked Screen -->
+<div id="locked-screen">
+  <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;margin-bottom:16px;">
+    <rect x="20" y="38" width="50" height="38" rx="8" fill="#27500A"/>
+    <path d="M30 38 V28 C30 16 60 16 60 28 V38" fill="none" stroke="#27500A" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="45" cy="57" r="6" fill="#EAF3DE"/>
+    <rect x="43" y="57" width="4" height="10" rx="2" fill="#EAF3DE"/>
+  </svg>
+  <h2 style="font-size:22px;font-weight:800;color:#27500A;margin-bottom:10px;">Session Limit Reached</h2>
+  <p style="font-size:15px;color:#3B6D11;max-width:300px;line-height:1.55;margin-bottom:20px;">You have used all 5 free sessions for this flashcard set. Contact your AgriGuru teacher to unlock more.</p>
+  <!-- Locked screen promo banner -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(160deg,rgba(39,80,10,0.07),rgba(15,110,86,0.07));border:1.5px solid #C0DD97;border-radius:16px;padding:12px 16px;max-width:320px;">
+    <svg viewBox="0 0 210 52" xmlns="http://www.w3.org/2000/svg" style="width:140px;display:block;">
+      <text x="14" y="11" font-family="Georgia,'Times New Roman',serif" font-size="8.5" font-style="italic" font-weight="700" fill="#2E7D32" letter-spacing="0.3">Conglomer India's</text>
+      <text x="10" y="40" font-family="Georgia,'Times New Roman',serif" font-size="32" font-weight="900" letter-spacing="-0.5">
+        <tspan fill="#2E7D32">agri</tspan><tspan fill="#c8a800">guru</tspan>
+      </text>
+      <text x="100" y="51" font-family="'Courier New',Courier,monospace" font-size="11.5" font-weight="700" fill="#7a8a00" letter-spacing="3">EDTECH</text>
+      <circle cx="73" cy="9" r="2.8" fill="#2E7D32"/>
+    </svg>
+    <div style="height:1px;width:80%;background:linear-gradient(90deg,transparent,rgba(200,168,0,0.5),transparent);margin:2px 0;"></div>
+    <p style="color:#27500A;font-size:13px;font-weight:700;text-align:center;font-family:'Georgia','Times New Roman',serif;font-style:italic;">Confused after your Agri degree?</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;">
+      <span style="font-size:10px;font-weight:700;color:#1B5E20;text-transform:uppercase;border:1.5px solid rgba(27,94,32,0.3);border-radius:20px;padding:3px 10px;background:rgba(27,94,32,0.07);font-family:'Georgia','Times New Roman',serif;">Coaching</span>
+      <span style="color:#c8a800;font-size:14px;">•</span>
+      <span style="font-size:10px;font-weight:700;color:#1B5E20;text-transform:uppercase;border:1.5px solid rgba(27,94,32,0.3);border-radius:20px;padding:3px 10px;background:rgba(27,94,32,0.07);font-family:'Georgia','Times New Roman',serif;">Certified Courses</span>
+      <span style="color:#c8a800;font-size:14px;">•</span>
+      <span style="font-size:10px;font-weight:700;color:#1B5E20;text-transform:uppercase;border:1.5px solid rgba(27,94,32,0.3);border-radius:20px;padding:3px 10px;background:rgba(27,94,32,0.07);font-family:'Georgia','Times New Roman',serif;">Job Updates</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;">
+      <div style="width:26px;height:26px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.946-1.414A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.952 7.952 0 01-4.054-1.108l-.291-.173-3.017.862.878-3.204-.19-.31A7.952 7.952 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/>
+        </svg>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#3B6D11;font-family:'Georgia','Times New Roman',serif;font-style:italic;">We'll guide you!</div>
+        <div style="font-size:18px;font-weight:900;color:#1B5E20;font-family:'Georgia','Times New Roman',serif;">8590 753 947</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Decorative plant bottom -->
+<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg"
+     style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:120px;opacity:0.06;pointer-events:none;z-index:0;">
+  <rect x="56" y="40" width="8" height="50" rx="4" fill="#3B6D11"/>
+  <path d="M60 80 C60 50 88 28 96 8 C76 24 62 50 60 80Z" fill="#639922"/>
+  <path d="M60 80 C60 48 32 26 24 6 C44 23 58 50 60 80Z" fill="#97C459"/>
+  <path d="M35 85 C35 52 58 28 65 8 C50 24 37 48 35 85Z" fill="#FAC775"/>
+  <path d="M35 85 C35 50 12 26 5 6 C20 23 33 48 35 85Z" fill="#EF9F27"/>
+</svg>
+
+<script>
+var LOCK_KEY = 'agriguru_kpp2_views_v1';
+var MAX_VIEWS = 5;
+
+function checkLock() {
+  try {
+    var views = parseInt(localStorage.getItem(LOCK_KEY) || '0', 10);
+    if (views >= MAX_VIEWS) {
+      document.getElementById('locked-screen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+function setLock() {
+  try {
+    var views = parseInt(localStorage.getItem(LOCK_KEY) || '0', 10);
+    localStorage.setItem(LOCK_KEY, views + 1);
+  } catch(e) {}
+}
+
+// ── 20 NEW QUESTIONS — Kerala Package of Practices (Set 2) ──────────────────
+var cards = [
+  // DEFINITIONS (4)
+  {type:"definition", tag:"Definition", tc:"tag-agronomy",
+   q:"What is the Alternate Wetting and Drying (AWD) method in rice cultivation?",
+   a:"A water-saving technique where the field is allowed to dry for a few days before re-flooding, maintaining soil moisture at a threshold without continuous flooding",
+   h:"AWD can save 20–30% irrigation water; promoted in Kerala paddy fields under SRI",
+   ref:"Kerala Package of Practices — Rice Cultivation; KAU Paddy Research Station, Mannuthy"},
+
+  {type:"definition", tag:"Definition", tc:"tag-soil",
+   q:"What is Soil Organic Carbon (SOC)?",
+   a:"The carbon stored in soil organic matter — humus, plant residues, microbial biomass — that improves soil fertility, water retention and aggregate stability",
+   h:"Kerala laterite soils are low in SOC; green manuring and FYM are recommended to build it",
+   ref:"Kerala Package of Practices — Soil Health; ICAR-NBSS&LUP; KAU Soil Science Dept."},
+
+  {type:"definition", tag:"Definition", tc:"tag-horticulture",
+   q:"What is Physiological Fruit Drop?",
+   a:"Natural abscission of flowers or immature fruits due to internal factors such as competition for photosynthates, hormone imbalances or poor pollination",
+   h:"NAA spray at 20 ppm is recommended to control mango fruit drop in Kerala orchards",
+   ref:"Kerala Package of Practices for Fruit Crops; KAU Horticulture Dept., Vellanikkara"},
+
+  {type:"definition", tag:"Definition", tc:"tag-protection",
+   q:"What is a Pheromone Trap in pest management?",
+   a:"A device baited with synthetic sex pheromone that attracts and traps male insects, used for monitoring pest population and mass trapping in IPM",
+   h:"Used in Kerala for pink bollworm in cotton and fruit flies in bitter gourd, mango",
+   ref:"Kerala Package of Practices — Plant Protection; NIPHM Pest Management Manual"},
+
+  // PROCESSES (4)
+  {type:"process", tag:"Process", tc:"tag-agronomy",
+   q:"What are the recommended steps for System of Rice Intensification (SRI) in Kerala?",
+   a:"Transplant young seedlings (8–12 days) singly at wider spacing (25×25 cm) → maintain moist (not flooded) soil → use mechanical weeder → apply organic manure",
+   h:"SRI increases yield and saves water; widely promoted by Kerala Agriculture Dept.",
+   ref:"Kerala Package of Practices — Rice (SRI Method); KAU, Thrissur"},
+
+  {type:"process", tag:"Process", tc:"tag-soil",
+   q:"What are the steps in vermicomposting for Kerala farmers?",
+   a:"Collect organic waste → pre-compost 15 days → add earthworms (Eisenia fetida or Eudrilus eugeniae) → maintain moisture (60%) → harvest in 45–60 days",
+   h:"Vermicompost is rich in available NPK; widely promoted in Kerala homestead gardens",
+   ref:"Kerala Package of Practices — Organic Farming; KAU Agronomy Dept.; VFPCK Kerala"},
+
+  {type:"process", tag:"Process", tc:"tag-improvement",
+   q:"What is the process of embryo rescue in coconut?",
+   a:"Immature embryo extracted from coconut (zygotic) → surface sterilised → placed on MS medium → cultured under controlled conditions → hardened seedlings transferred to nursery",
+   h:"Used to overcome cross-incompatibility in interspecific coconut crosses at CPCRI, Kasaragod",
+   ref:"Kerala Package of Practices — Coconut; CPCRI Kasaragod; KAU Crop Improvement"},
+
+  {type:"process", tag:"Process", tc:"tag-horticulture",
+   q:"What are the steps for air layering (gooti/marcotting) in mango?",
+   a:"Select healthy pencil-thick shoot → ring-bark 3–4 cm → apply IBA paste → wrap with moist sphagnum moss → cover with polythene → sever after 45–60 days when roots appear",
+   h:"Air layering maintains true-to-type plants; used in mango, guava, jackfruit in Kerala",
+   ref:"Kerala Package of Practices for Fruit Crops; KAU Horticulture; ICAR-IIHR Bangalore"},
+
+  // COMPARISONS (4)
+  {type:"comparison", tag:"Comparison", tc:"tag-agronomy",
+   q:"Compare SRI vs Conventional Rice Cultivation.",
+   a:"SRI: young seedlings, single planting, moist soil, wider spacing, higher yield. Conventional: older seedlings, clump planting, continuous flooding, closer spacing.",
+   h:"SRI saves 30% water and increases yield by 20–25% under Kerala conditions",
+   ref:"Kerala Package of Practices — Rice; KAU Agronomic Research Station, Mannuthy"},
+
+  {type:"comparison", tag:"Comparison", tc:"tag-protection",
+   q:"Compare Contact Pesticides vs Systemic Pesticides.",
+   a:"Contact: kill on direct touch, no translocation (e.g. malathion). Systemic: absorbed and translocated inside plant, kill sucking/feeding insects (e.g. imidacloprid, monocrotophos).",
+   h:"Systemic insecticides are effective against sucking pests like thrips on black pepper in Kerala",
+   ref:"Kerala Package of Practices — Plant Protection; Insecticide Act 1968; KAU Entomology Dept."},
+
+  {type:"comparison", tag:"Comparison", tc:"tag-soil",
+   q:"Compare Green Manuring vs FYM (Farm Yard Manure).",
+   a:"Green manure: in-situ, fast decomposition, adds N and organic matter (e.g. Sesbania, Crotalaria). FYM: bulky, slow release, improves soil structure, all nutrients (cattle dung + litter).",
+   h:"Sesbania rostrata is recommended as green manure for paddy in Kerala",
+   ref:"Kerala Package of Practices — Soil Fertility; KAU Agronomy Dept.; ICAR Soil Science"},
+
+  {type:"comparison", tag:"Comparison", tc:"tag-horticulture",
+   q:"Compare Cool Season Vegetables vs Warm Season Vegetables grown in Kerala.",
+   a:"Cool season: cabbage, carrot, peas, beans — Munnar/high range (above 1000 m), temperature 10–20°C. Warm season: bittergourd, snake gourd, amaranth — plains, temperature 25–35°C.",
+   h:"Ooty-Munnar belt supplies cool season vegetables to Kerala plains markets",
+   ref:"Kerala Package of Practices — Vegetable Crops; KAU Olericulture Dept.; ICAR-IIHR"},
+
+  // VISUAL / DIAGRAM-TYPE (4)
+  {type:"visual", tag:"Visual", tc:"tag-agronomy",
+   q:"Crop rotation sequence: what is the recommended paddy-based rotation in Kerala Kuttanad?",
+   a:"Kharif Paddy (Virippu) → Rabi Paddy (Mundakan) → Puncha Paddy OR Paddy → Sesame/Pulses in summer",
+   h:"Kuttanad is the 'Rice Bowl of Kerala'; below sea-level cultivation with unique water management",
+   ref:"Kerala Package of Practices — Rice; Kuttanad Package; KAU Mannuthy & Regional Agri. Research Station, Pattambi"},
+
+  {type:"visual", tag:"Visual", tc:"tag-soil",
+   q:"Terracing: describe the concept and its purpose in Kerala hill farms.",
+   a:"Hill slope → cut into level steps (bench terraces) or sloped terraces → retain runoff, reduce slope length → prevents gully erosion and conserves moisture",
+   h:"Bench terraces are widely used in Wayanad and Idukki districts for cardamom and coffee plantations",
+   ref:"Kerala Package of Practices — Soil Conservation; CSWCRTI; Kerala Land Use Board"},
+
+  {type:"visual", tag:"Visual", tc:"tag-improvement",
+   q:"Hybridisation diagram: what is the sequence in a cross-pollinated crop like coconut?",
+   a:"Select parent palms (mother × father) → emasculate mother (spathe bagging) → collect pollen from father → transfer pollen by hand to mother → bag → harvest hybrid nuts",
+   h:"COD × WCT (Chowghat Orange Dwarf × West Coast Tall) is the popular hybrid — CPCRI Kasaragod",
+   ref:"Kerala Package of Practices — Coconut Breeding; CPCRI Kasaragod; KAU Crop Improvement"},
+
+  {type:"visual", tag:"Visual", tc:"tag-protection",
+   q:"Biocontrol pyramid for black pepper in Kerala: list organisms used at each level.",
+   a:"Soil level: Trichoderma viride (root rot) → Foliage: Pseudomonas fluorescens (Phytophthora) → Insect level: Beauveria bassiana (Pollu beetle) → Nematode level: Pochonia chlamydosporia",
+   h:"Trichoderma + Pseudomonas enriched compost is the standard biocontrol package for pepper in Kerala",
+   ref:"Kerala Package of Practices — Black Pepper; KAU Pepper Research Station, Panniyur; ICAR-IISR Kozhikode"},
+
+  // Q & A (4)
+  {type:"qa", tag:"Q & A", tc:"tag-agronomy",
+   q:"What are the recommended fertiliser doses for coconut in Kerala (per palm per year)?",
+   a:"500 g N : 320 g P2O5 : 1200 g K2O, applied in 2 splits (May–June and September–October) along with 25 kg FYM or compost per palm",
+   h:"High K requirement reflects coconut's demand for fruit development and disease resistance",
+   ref:"Kerala Package of Practices — Coconut Nutrition; KAU, Thrissur; CPCRI, Kasaragod"},
+
+  {type:"qa", tag:"Q & A", tc:"tag-improvement",
+   q:"What are Geographical Indications (GI) tags awarded to Kerala agricultural products?",
+   a:"Malabar pepper, Alleppey green cardamom, Wayanad Jeerakasala rice, Vazhakulam pineapple, Palakkadan Matta rice, Chengalikodan Nendran banana among others",
+   h:"GI tags protect regional specialties and fetch premium prices for Kerala farmers",
+   ref:"GI Registry India; Kerala State Intellectual Property Cell; Geographical Indications Act 1999"},
+
+  {type:"qa", tag:"Q & A", tc:"tag-social",
+   q:"What is the role of Kudumbashree in Kerala agriculture?",
+   a:"Kudumbashree organises women SHGs for collective farming (Vegetable & Paddy cultivation), agro-processing, and marketing; linked to MGNREGS for farm labour in Kerala",
+   h:"Kudumbashree collective farming covers over 30,000 hectares in Kerala through NHG/ADS/CDS network",
+   ref:"Kudumbashree Mission Kerala; Directorate of Agriculture Kerala; MGNREGS Kerala"},
+
+  {type:"qa", tag:"Q & A", tc:"tag-protection",
+   q:"What is Quick Wilt (Phytophthora foot rot) of black pepper and its management?",
+   a:"Caused by Phytophthora capsici — leaves yellow, collar region rots, plant wilts rapidly. Manage with bordeaux mixture (1%) soil drenching + Trichoderma + remove infected tissue",
+   h:"Quick Wilt is the most devastating disease of black pepper in Kerala's humid conditions",
+   ref:"Kerala Package of Practices — Black Pepper Plant Protection; KAU Panniyur; ICAR-IISR Kozhikode"},
+];
+
+var activeTypes = {definition:true, process:true, comparison:true, visual:true, qa:true};
+var typeConfig = {
+  definition:{label:"Definition", bg:"#E3F2FD", col:"#0D47A1", dot:"#1976D2"},
+  process:   {label:"Process",    bg:"#E8F5E9", col:"#1B5E20", dot:"#388E3C"},
+  comparison:{label:"Comparison", bg:"#FFF3E0", col:"#BF360C", dot:"#F57C00"},
+  visual:    {label:"Visual",     bg:"#EDE7F6", col:"#311B92", dot:"#673AB7"},
+  qa:        {label:"Q & A",      bg:"#E0F2F1", col:"#004D40", dot:"#00897B"},
+};
+
+var filteredCards = [];
+var idx = 0, score = 0, streak = 0, flipped = false;
+
+function buildFilters() {
+  var row = document.getElementById('filter-row');
+  row.innerHTML = '';
+  Object.keys(typeConfig).forEach(function(k) {
+    var v = typeConfig[k];
+    var p = document.createElement('div');
+    p.className = 'fpill' + (activeTypes[k] ? '' : ' off');
+    p.textContent = v.label;
+    p.style.cssText = 'background:' + v.bg + ';color:' + v.col + ';border-color:' + v.dot;
+    p.onclick = function() {
+      var count = 0;
+      Object.keys(activeTypes).forEach(function(x){ if(activeTypes[x]) count++; });
+      if (activeTypes[k] && count > 1) activeTypes[k] = false;
+      else activeTypes[k] = true;
+      buildFilters();
+      rebuildDeck();
+    };
+    row.appendChild(p);
+  });
+}
+
+function rebuildDeck() {
+  filteredCards = shuffle(cards.filter(function(c) { return activeTypes[c.type]; }));
+  idx = 0; score = 0; streak = 0;
+  document.getElementById('score-num').textContent = 0;
+  document.getElementById('done').style.display = 'none';
+  document.getElementById('card').style.display = 'flex';
+  document.getElementById('streak').style.display = 'block';
+  render();
+}
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function render() {
+  if (!filteredCards.length) return;
+  var c = filteredCards[idx];
+  document.getElementById('tag').textContent = c.tag;
+  document.getElementById('tag').className = c.tc;
+  document.getElementById('question').textContent = c.q;
+  document.getElementById('answer').textContent = c.a;
+  document.getElementById('hint').textContent = c.h;
+  document.getElementById('ref-text').innerHTML = '<span>Ref:</span> ' + c.ref;
+  document.getElementById('counter').textContent = 'Card ' + (idx + 1) + ' of ' + filteredCards.length;
+  document.getElementById('score-num').textContent = score;
+  var pct = Math.max(3, Math.round((idx / filteredCards.length) * 100));
+  document.getElementById('pb').style.width = pct + '%';
+  document.getElementById('answer-area').style.display = 'none';
+  document.getElementById('btns').style.display = 'none';
+  document.getElementById('tap-hint').style.display = 'block';
+  document.getElementById('streak').textContent = '';
+  document.getElementById('card').className = 'state-q';
+  flipped = false;
+}
+
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  document.getElementById('answer-area').style.display = 'block';
+  document.getElementById('btns').style.display = 'flex';
+  document.getElementById('tap-hint').style.display = 'none';
+  document.getElementById('card').className = 'state-a';
+}
+
+function mark(got) {
+  if (got) {
+    score++;
+    streak++;
+    document.getElementById('score-num').textContent = score;
+    if (streak >= 3) {
+      document.getElementById('streak').textContent = streak + ' correct in a row! Keep going! 🔥';
+    }
+  } else {
+    streak = 0;
+  }
+  idx++;
+  if (idx >= filteredCards.length) showDone();
+  else render();
+}
+
+function showDone() {
+  document.getElementById('card').style.display = 'none';
+  document.getElementById('streak').style.display = 'none';
+  document.getElementById('btns').style.display = 'none';
+  document.getElementById('done').style.display = 'flex';
+  var pct = Math.round((score / filteredCards.length) * 100);
+  document.getElementById('done-title').textContent = score + ' / ' + filteredCards.length + ' correct (' + pct + '%)';
+  var msg = pct >= 80 ? 'Excellent! You are well prepared for this section.'
+            : pct >= 60 ? 'Good effort! Review the topics you missed.'
+            : 'Keep practising! Focus on missed topics — you can do it.';
+  document.getElementById('done-msg').textContent = msg;
+}
+
+// INIT
+if (!checkLock()) {
+  setLock();
+  try {
+    var used = parseInt(localStorage.getItem(LOCK_KEY) || '0', 10);
+    var left = MAX_VIEWS - used;
+    var vEl = document.getElementById('views-left');
+    if (vEl) vEl.textContent = left + ' of ' + MAX_VIEWS + ' sessions remaining';
+  } catch(e) {}
+  buildFilters();
+  filteredCards = shuffle(cards);
+  render();
+}
+</script>
+</body>
+</html>
